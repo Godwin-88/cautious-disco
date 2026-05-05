@@ -436,6 +436,73 @@ RETURN nodes,
        [e IN raw_edges WHERE e IS NOT NULL] AS edges
 """
 
+# ---------------------------------------------------------------------------
+# Chat session persistence
+# ---------------------------------------------------------------------------
+
+ENSURE_CHAT_SESSION = """
+MERGE (s:ChatSession {session_id: $session_id})
+ON CREATE SET s.created_at = datetime(),
+              s.title      = $title,
+              s.message_count = 0
+SET s.last_active = datetime()
+RETURN s.session_id AS session_id
+"""
+
+APPEND_CHAT_EXCHANGE = """
+MATCH (s:ChatSession {session_id: $session_id})
+SET s.message_count  = coalesce(s.message_count, 0) + 2,
+    s.last_active    = datetime()
+CREATE (u:ChatMessage {
+    message_id:  $user_msg_id,
+    role:        'user',
+    content:     $user_content,
+    created_at:  datetime()
+})
+CREATE (a:ChatMessage {
+    message_id:  $asst_msg_id,
+    role:        'assistant',
+    content:     $asst_content,
+    sources_json: $sources_json,
+    created_at:  datetime()
+})
+CREATE (s)-[:HAS_MESSAGE]->(u)
+CREATE (s)-[:HAS_MESSAGE]->(a)
+"""
+
+GET_SESSION_MESSAGES = """
+MATCH (s:ChatSession {session_id: $session_id})-[:HAS_MESSAGE]->(m:ChatMessage)
+RETURN m.role        AS role,
+       m.content     AS content,
+       coalesce(m.sources_json, '[]') AS sources_json,
+       toString(m.created_at) AS created_at
+ORDER BY m.created_at ASC
+"""
+
+GET_RECENT_CHAT_SESSIONS = """
+MATCH (s:ChatSession)
+WHERE coalesce(s.message_count, 0) > 0
+RETURN s.session_id            AS session_id,
+       coalesce(s.title, 'Untitled') AS title,
+       toString(s.last_active) AS last_active,
+       coalesce(s.message_count, 0) AS message_count
+ORDER BY s.last_active DESC
+LIMIT 15
+"""
+
+DELETE_CHAT_SESSION = """
+MATCH (s:ChatSession {session_id: $session_id})
+OPTIONAL MATCH (s)-[:HAS_MESSAGE]->(m:ChatMessage)
+DETACH DELETE m
+WITH s DETACH DELETE s
+"""
+
+CHECK_DOMAIN_DRL_STATUS = """
+MATCH (d:Domain)
+WHERE d.name IN $domain_names AND d.id <> '__hub__'
+RETURN d.name AS name, coalesce(d.drl_trained, false) AS trained
+"""
+
 GET_ARCHIMATE_CAPABILITIES = """
 MATCH (d:Domain)-[:PARENT_OF]->(sd:SubDomain)-[:PARENT_OF]->(c:Capability)
 WHERE d.id <> '__hub__'
