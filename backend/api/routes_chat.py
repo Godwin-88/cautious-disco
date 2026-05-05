@@ -116,7 +116,7 @@ async def chat(
     reply = await llm.chat(
         messages=messages,
         system=CHAT_SYSTEM,
-        max_tokens=1024,
+        max_tokens=settings.llm_max_tokens,
         temperature=0.4,
     )
     return {"reply": reply, "sources": sources, "suggested_action": suggested_action}
@@ -144,7 +144,7 @@ async def chat_stream(
             async for chunk in llm.chat_stream(
                 messages=messages,
                 system=CHAT_SYSTEM,
-                max_tokens=1024,
+                max_tokens=settings.llm_max_tokens,
             ):
                 yield f"data: {json.dumps({'text': chunk})}\n\n"
         except Exception as exc:
