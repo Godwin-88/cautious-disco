@@ -1,0 +1,58 @@
+# ── Credentials & secrets ────────────────────────────────────────────────────
+.env
+*.pem
+*.key
+secrets/
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.eggs/
+dist/
+build/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ── Virtual environment ───────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ── ML checkpoints & model weights ───────────────────────────────────────────
+backend/drl/checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# ── Large source / data files ─────────────────────────────────────────────────
+*.xlsx
+*.xls
+*.pdf
+*.csv.bak
+
+# ── IDE & editor ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Internal planning & session artefacts ─────────────────────────────────────
+.claude/
+PLAN.md
+strategy2.md
+
+# ── Streamlit cache ───────────────────────────────────────────────────────────
+.streamlit/
+
+# ── pytest / coverage ────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/

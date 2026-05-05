@@ -1,0 +1,8 @@
+# Run from repo root: pip install -r requirements.pipeline.txt
+neo4j>=5.0.0
+python-dotenv>=1.0.0
+sentence-transformers>=2.6.0
+numpy>=1.24.0
+openai>=1.0.0
+torch>=2.1.0
+tqdm>=4.66.0
