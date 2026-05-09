@@ -6,11 +6,20 @@ An AI-powered **Enterprise Architecture platform** that transforms business goal
 
 ---
 
+## Changelog (latest first)
+
+| Date | What changed |
+|------|-------------|
+| 2026-05-07 | Chat session persistence (Neo4j-backed), DRL enrichment triggered per chat turn, `llm_max_tokens` fix (was hard-coded 1024) |
+| 2026-05-03 | Full platform: EA Advisor, Graph Explorer, Integrations, DRL pipeline, initial docs |
+
+---
+
 ## Platform Tabs
 
 | Tab | Description |
 |-----|-------------|
-| **EA Advisor** | Streaming conversational AI — ask anything about enterprise architecture |
+| **EA Advisor** | Streaming conversational AI with Neo4j-persisted sessions and automatic DRL enrichment |
 | **Graph Explorer** | Interactive force-directed network of 44 enterprise domains |
 | **Strategic Roadmap** | Hierarchical questionnaire → 3-phase Epics → Features → User Stories → Tasks |
 | **Initiatives & Scenarios** | Deep-dive into every Epic with governance acceptance criteria and tasks |
@@ -53,6 +62,9 @@ Neo4j Aura Knowledge Graph
 - **Output caching:** MD5(sorted capability IDs + org_type) → `:GeneratedOutput` node in Neo4j; cache hits skip the entire pipeline
 - **Cross-domain synthesis:** when org type spans multiple domains (e.g. PE firm + Aviation), the `[CROSS-DOMAIN CONTEXT]` header and per-epic framing adapt the output accordingly
 - **Self-correcting loop:** compliance verifier scores the roadmap; if score < 70 and iterations < 2, the generator is re-invoked with specific issues to fix
+- **Chat session persistence:** every user↔assistant exchange is stored in Neo4j as `(:ChatSession)-[:HAS_MESSAGE]→(:ChatMessage)` nodes; the Conversation History panel lets users switch, reload, and delete sessions across page refreshes
+- **Automatic DRL enrichment:** after each chat turn, domains retrieved from the RAG context that have not yet been DRL-trained trigger a fire-and-forget background training run (50 episodes); a toast notification confirms the trigger
+- **Token budget fix:** `LLMClient` now uses `settings.llm_max_tokens` (default 2048) for both streaming and non-streaming calls; the previous hard-coded 1024 cap was causing truncated responses
 
 ---
 
@@ -213,12 +225,31 @@ The DRL policy network is ROCm-compatible. `get_device()` in `backend/drl/policy
 
 ## API Reference
 
+### Core
+
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/v1/health` | GET | Backend + Neo4j + GPU health |
 | `/api/v1/analyze` | POST | Full agentic pipeline |
-| `/api/v1/chat` | POST | Non-streaming RAG chat |
-| `/api/v1/chat/stream` | GET | SSE streaming RAG chat |
+| `/api/v1/domains` | GET | All 44 domains |
+| `/api/v1/subdomains` | GET | SubDomains filtered by domain names |
+| `/api/v1/subdomain-capabilities` | GET | Capabilities filtered by subdomain IDs |
+
+### Chat & Sessions
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/chat` | POST | Non-streaming RAG chat (persists to session) |
+| `/api/v1/chat/stream` | GET | SSE streaming RAG chat (persists to session) |
+| `/api/v1/chat/sessions` | POST | Create or touch a chat session |
+| `/api/v1/chat/sessions` | GET | List 15 most recent sessions |
+| `/api/v1/chat/sessions/{id}/messages` | GET | Full message history for a session |
+| `/api/v1/chat/sessions/{id}` | DELETE | Delete a session and all its messages |
+
+### Graph, Integrations & Training
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
 | `/api/v1/graph/network` | GET | `{nodes, edges}` for Graph Explorer |
 | `/api/v1/integrations/jira/export` | POST | Live Jira Epic/Story creation |
 | `/api/v1/integrations/erp/ingest` | POST | CSV → Neo4j ExternalSystem nodes |

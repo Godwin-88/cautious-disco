@@ -66,7 +66,7 @@ def render_training_tab():
             margin=dict(l=200, r=20, t=20, b=20),
             yaxis=dict(tickfont=dict(size=10)),
         )
-        st.plotly_chart(fig_heat, use_container_width=True)
+        st.plotly_chart(fig_heat, width='stretch')
     else:
         st.info("No coverage data yet. Run training to populate.")
 
@@ -105,7 +105,7 @@ def render_training_tab():
                 line=dict(color="white", width=2, dash="dash"),
             ))
             fig_line.update_layout(margin=dict(t=20, b=20))
-            st.plotly_chart(fig_line, use_container_width=True)
+            st.plotly_chart(fig_line, width='stretch')
 
         # DRL reward by sector bar chart
         if "sector" in df.columns and not df.empty:
@@ -120,7 +120,7 @@ def render_training_tab():
                 title="Average DRL Reward by Sector",
             )
             fig_bar.update_layout(margin=dict(t=40, b=20), coloraxis_showscale=False)
-            st.plotly_chart(fig_bar, use_container_width=True)
+            st.plotly_chart(fig_bar, width='stretch')
     else:
         st.info("No training runs recorded yet. Use the controls below to start training.")
 
@@ -142,7 +142,7 @@ def render_training_tab():
         domain_filter = st.text_input("Specific domain (blank = all 44)", placeholder="e.g. Healthcare Provider")
     with ctrl3:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("Run AI Learning Session", type="primary", use_container_width=True):
+        if st.button("Run AI Learning Session", type="primary", width='stretch'):
             with st.spinner("Submitting training job..."):
                 resp = trigger_training(
                     episodes_per_domain=int(episodes),
@@ -168,4 +168,4 @@ def render_training_tab():
             "Strategic Domain", "Sector", "Episodes",
             "Prioritisation Reward", "Avg (last 10)", "Device", "Timestamp",
         ]
-        st.dataframe(df_show, use_container_width=True, hide_index=True)
+        st.dataframe(df_show, width='stretch', hide_index=True)

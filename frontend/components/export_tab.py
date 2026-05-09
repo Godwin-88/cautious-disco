@@ -128,7 +128,7 @@ def render_export_tab(result: dict) -> None:
         data=content,
         file_name=filename,
         mime=mime,
-        use_container_width=True,
+        width='stretch',
         type="primary",
     )
 

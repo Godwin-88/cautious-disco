@@ -170,7 +170,7 @@ class GeneratorAgent:
         try:
             raw_text = await self.llm.chat(
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=2048,
+                max_tokens=4096,
                 temperature=0.4,
             )
             raw = extract_json(raw_text)

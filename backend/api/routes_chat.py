@@ -103,6 +103,9 @@ def _build_messages(history: list[dict], user_message: str, context: str) -> lis
     messages = []
     for msg in history[-8:]:
         if msg.get("role") in ("user", "assistant") and msg.get("content"):
+            # Skip the initial welcome assistant message to avoid invalid conversation order
+            if msg["role"] == "assistant" and "Enterprise Architecture Advisor" in msg["content"]:
+                continue
             messages.append({"role": msg["role"], "content": msg["content"]})
     messages.append({
         "role": "user",

@@ -209,7 +209,7 @@ def _render_erp_ingest():
         try:
             df = pd.read_csv(uploaded)
             st.caption(f"Preview — {len(df)} rows · {len(df.columns)} columns")
-            st.dataframe(df.head(5), use_container_width=True)
+            st.dataframe(df.head(5), width='stretch')
         except Exception as exc:
             st.warning(f"Preview error: {exc}")
 
@@ -314,7 +314,7 @@ def _render_archimate():
 
     st.dataframe(
         df,
-        use_container_width=True,
+        width='stretch',
         height=520,
         column_config={
             "Capability": st.column_config.TextColumn(width="large"),

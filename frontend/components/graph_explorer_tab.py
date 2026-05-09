@@ -150,7 +150,7 @@ def render_graph_explorer_tab():
         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     # ── Summary metrics ───────────────────────────────────────────────────────
     drl_count = sum(1 for n in nodes if n.get("drl_trained"))

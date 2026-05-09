@@ -55,7 +55,7 @@ def get_subdomain_capabilities(subdomain_ids: list[str]) -> list[dict]:
         return []
 
 
-def analyze(payload: dict, timeout: int = 180) -> dict:
+def analyze(payload: dict, timeout: int = 600) -> dict:
     r = requests.post(_url("/api/v1/analyze"), json=payload, timeout=timeout)
     r.raise_for_status()
     return r.json()
@@ -108,7 +108,7 @@ def chat(
             payload["domain_filter"] = domain_filter
         if session_id:
             payload["session_id"] = session_id
-        r = requests.post(_url("/api/v1/chat"), json=payload, timeout=60)
+        r = requests.post(_url("/api/v1/chat"), json=payload, timeout=120)
         r.raise_for_status()
         return r.json()
     except Exception as exc:
@@ -127,7 +127,7 @@ def stream_chat(message: str, history: list[dict], session_id: str = ""):
     params = {"message": message, "history": _json.dumps(history), "session_id": session_id}
     try:
         with requests.get(
-            _url("/api/v1/chat/stream"), params=params, stream=True, timeout=180
+            _url("/api/v1/chat/stream"), params=params, stream=True, timeout=600
         ) as r:
             r.raise_for_status()
             for raw in r.iter_lines():

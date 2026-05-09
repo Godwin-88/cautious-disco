@@ -31,8 +31,9 @@ from frontend.components.integrations_tab import render_integrations_tab
 
 def render_sidebar():
     with st.sidebar:
-        st.image("https://www.amd.com/content/dam/amd/en/images/logos/amd-logo-2022-black.svg",
-                 width=120)
+        # Use local logo for reliability; original URL was 404
+        logo_path = os.path.join(os.path.dirname(__file__), "amd_logo.svg")
+        st.image(logo_path, width=120)
         st.markdown("## EA Strategy Optimizer")
         st.markdown(
             "Powered by **AMD MI300X · ROCm · Qwen-72B**\n\n"

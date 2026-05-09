@@ -1,0 +1,178 @@
+[
+  {
+    "id": "60cd3aaa87b31fece1684d15",
+    "name": "Manage Food Supply Core Operations"
+  },
+  {
+    "id": "c67f9034a100bd07fa28ec64",
+    "name": "Manage Regulatory (Communications) Core Operations"
+  },
+  {
+    "id": "b90d9814976f98e9327e673a",
+    "name": "Manage Digital IT"
+  },
+  {
+    "id": "4f82e6c356398079f163ae7c",
+    "name": "Manage Digital Channels (Non Commercial)"
+  },
+  {
+    "id": "91acb95fd43a1458d9cb35d1",
+    "name": "Manage Digital Intelligence (Non Commercial)"
+  },
+  {
+    "id": "fa961137713251729480a913",
+    "name": "Manage Digital Intelligence"
+  },
+  {
+    "id": "1c015b4b7b44e13082c4047c",
+    "name": "Manage Digital Backoffice"
+  },
+  {
+    "id": "8287fe57b0ed130601a1790a",
+    "name": "Manage Capital Core Operations"
+  },
+  {
+    "id": "bf8632c2bc18e4495e1075d3",
+    "name": "Manage Digital Service Orchestration"
+  },
+  {
+    "id": "e7e89d701ec6e0fd230d1aa8",
+    "name": "Manage Digital GPRC"
+  },
+  {
+    "id": "fd8f972e11fa31edbbf9b3bc",
+    "name": "Manage Digital Workspace"
+  },
+  {
+    "id": "6a05247c5aba7dcf6edd80a1",
+    "name": "Manage Logistics 4.0 Core Operations"
+  },
+  {
+    "id": "5b83216414831352acbcaeb6",
+    "name": "Manage MarCom Orchestration"
+  },
+  {
+    "id": "99591d1fcf0495b0e207889a",
+    "name": "Manage Digital Experience Orchestration"
+  },
+  {
+    "id": "54e98d61ba213561f41a3c7d",
+    "name": "Manage Clean Energy Core Operations"
+  },
+  {
+    "id": "731f34b7c06d556eff4dec1b",
+    "name": "Manage Investment Promotion Core Operations"
+  },
+  {
+    "id": "8e8809bcae1c2c5f26923b6d",
+    "name": "Manage O&G Core Operations"
+  },
+  {
+    "id": "ea69ead99f30789387e54f9d",
+    "name": "Manage Health Regulatory Authority Core Operations"
+  },
+  {
+    "id": "59c87f7a38971411b504edfc",
+    "name": "Manage Property Development Core Operations"
+  },
+  {
+    "id": "aa114aea4361673ae124746b",
+    "name": "Manage Airport Core Operation"
+  },
+  {
+    "id": "99fbbe0eb2dbcedaa38b24ee",
+    "name": "Manage Electricity Transmission Network"
+  },
+  {
+    "id": "56e01b0469153e6df1fb2905",
+    "name": "Manage CDC Core Operations"
+  },
+  {
+    "id": "871afcfca7f8ee24c6f43e34",
+    "name": "Manage Stock Exchange Core Operation"
+  },
+  {
+    "id": "10ea235572551b38a652ace8",
+    "name": "Manage Generic Core"
+  },
+  {
+    "id": "9648f7df149d7a61eb7aee29",
+    "name": "Manage Digital Academy Core Operations"
+  },
+  {
+    "id": "4be192c2f3e58fd6bf5af776",
+    "name": "Manage Pharmaceutical Core Operations"
+  },
+  {
+    "id": "6098af6dde77e7a074d18bef",
+    "name": "Manage Development Banking Core Operations"
+  },
+  {
+    "id": "f2c2e8d2b12cbbbcfdb92d18",
+    "name": "Manage Government Excellence Core Operations"
+  },
+  {
+    "id": "b3176b5236c14fb7498e4335",
+    "name": "Manage Endowment Core Operations"
+  },
+  {
+    "id": "2b37821a780df49df5677ac5",
+    "name": "Manage Telco Core Operation"
+  },
+  {
+    "id": "239caaeeb0e2aa4c4ec74e79",
+    "name": "Manage Court & Justice Core Operations"
+  },
+  {
+    "id": "810a79efb8eba610f05b20f5",
+    "name": "Manage Healthcare Provider Core Operations"
+  },
+  {
+    "id": "196e472d06d87746de753aa6",
+    "name": "Manage Health System"
+  },
+  {
+    "id": "36f0ab34a498313dc5e025ba",
+    "name": "Manage Urban Planning & Development Core Operations"
+  },
+  {
+    "id": "9c317d92fbf268e673449328",
+    "name": "Manage  Professional Services Core Operations"
+  },
+  {
+    "id": "cae7292159c86a4b1b4e855a",
+    "name": "Manage Retail Banking Core Operations"
+  },
+  {
+    "id": "80fd478cf8ce52378a69fe0f",
+    "name": "Manage Digital Security"
+  },
+  {
+    "id": "6adbeaa88b3d136bca253d3c",
+    "name": "Manage Digital Channels"
+  },
+  {
+    "id": "3bf668f243dd3ddf08db3c07",
+    "name": "Manage Digital Inter-Operability & Automation"
+  },
+  {
+    "id": "2e8db392ab25dfa58864fb76",
+    "name": "Manage Digital Service Orchestration (Non Commercial)"
+  },
+  {
+    "id": "23bd93370a1d2d083dac465c",
+    "name": "Manage Digital Experience Orchestration (Non Commercial)"
+  },
+  {
+    "id": "bd6a199f993bd394dcec8114",
+    "name": "Manage Digital Financial Regulation Core Operations"
+  },
+  {
+    "id": "754c5f7b06e4952aeb9899e0",
+    "name": "Manage Healthcare Payer Core Operations"
+  },
+  {
+    "id": "737b97ad33a6e50597530ea9",
+    "name": "Manage Oil & Gas Core Operations"
+  }
+]

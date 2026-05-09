@@ -139,7 +139,7 @@ def render_input_form() -> dict | None:
         submitted = st.form_submit_button(
             "Generate Strategic Roadmap",
             type="primary",
-            use_container_width=True,
+            width='stretch',
         )
 
     if submitted:

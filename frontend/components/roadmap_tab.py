@@ -48,7 +48,7 @@ def render_drl_trace(drl_trace: dict) -> None:
                 title="AI Capability Prioritisation Scores",
             )
             fig.update_layout(height=350, showlegend=False, coloraxis_showscale=False)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
 
 def render_gantt(phases: list[dict]) -> None:
@@ -89,7 +89,7 @@ def render_gantt(phases: list[dict]) -> None:
     )
     fig.update_layout(height=max(400, len(rows) * 25), showlegend=True)
     fig.update_yaxes(autorange="reversed")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 
 def render_roadmap_tab(result: dict) -> None:

@@ -31,3 +31,22 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
+
+  neo4j:
+    image: neo4j:5.26-community
+    container_name: neo4j-amd
+
+    ports:
+      - "7475:7474"   # host:container
+      - "7688:7687"
+
+    environment:
+      NEO4J_AUTH: neo4j/your-password
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+
+    volumes:
+      - ~/neo4j/data:/data
+      - ~/neo4j/logs:/logs
+
+    restart: unless-stopped

@@ -89,11 +89,11 @@ def _render_session_panel():
     with st.expander("Conversation History", expanded=False):
         col_new, col_refresh = st.columns([3, 1])
         with col_new:
-            if st.button("New Conversation", type="primary", use_container_width=True):
+            if st.button("New Conversation", type="primary", width='stretch'):
                 _start_new_session()
                 st.rerun()
         with col_refresh:
-            if st.button("↻", help="Refresh session list", use_container_width=True):
+            if st.button("↻", help="Refresh session list", width='stretch'):
                 st.session_state.pop("_cached_sessions", None)
 
         # Load sessions (cached briefly in session state)
@@ -121,7 +121,7 @@ def _render_session_panel():
                         label,
                         key=f"sess_{sid}",
                         disabled=is_current,
-                        use_container_width=True,
+                        width='stretch',
                         help=f"{n_msgs} messages · {last}",
                     ):
                         _load_session(sid, s.get("title", ""))
