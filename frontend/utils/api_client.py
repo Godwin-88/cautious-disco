@@ -208,6 +208,20 @@ def delete_session(session_id: str) -> bool:
 # Graph network
 # ---------------------------------------------------------------------------
 
+def get_domain_detail(domain_name: str) -> dict:
+    """Returns {domain, standard, trend, subdomain_groups} for the Graph Explorer detail panel."""
+    try:
+        r = requests.get(
+            _url("/api/v1/graph/domain-detail"),
+            params={"domain_name": domain_name},
+            timeout=15,
+        )
+        r.raise_for_status()
+        return r.json()
+    except Exception:
+        return {"domain": {}, "standard": None, "trend": None, "subdomain_groups": []}
+
+
 def get_network_graph() -> dict:
     """Returns {nodes: [...], edges: [...]} for the knowledge graph explorer."""
     try:

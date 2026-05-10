@@ -101,24 +101,53 @@ class RetrieverAgent:
         return results
 
     def _cypher_traversal(
-        self, org_type: str, sectors: list[str], limit: int = 40
+        self, org_type: str, sectors: list[str], limit: int = 40,
+        expanded_queries: list[str] | None = None,
     ) -> list[dict]:
-        keyword = org_type.split()[0] if org_type else "digital"
-        sector_kw = sectors[0] if sectors else keyword
-        rows = self.neo4j.run_query(
-            GET_ENRICHED_CAPABILITIES_FOR_DOMAIN,
-            org_keyword=keyword,
-            sector_keyword=sector_kw,
-            limit=limit,
-        )
-        if not rows:
-            # Broad fallback
+        # Build keyword candidates from expanded queries first — they are
+        # semantically richer than splitting the raw org_type string which
+        # for chat messages starts with "What", "How", "Can", etc.
+        _stop = {"what", "how", "can", "the", "for", "and", "with", "that",
+                 "this", "our", "your", "my", "of", "a", "an", "in", "to",
+                 "is", "are", "we", "i", "do", "be", "on"}
+        candidates: list[str] = []
+        if expanded_queries:
+            for q in expanded_queries:
+                words = [w for w in q.lower().split() if w not in _stop and len(w) > 3]
+                if words:
+                    # Try multi-word phrase first (more specific), then first word
+                    candidates.append(" ".join(words[:2]))
+                    candidates.append(words[0])
+        # Fall back to org_type only if no expanded queries
+        if not candidates:
+            word = (org_type or "digital").split()[0].lower()
+            candidates.append(word if word not in _stop else "digital")
+
+        sector_kw = sectors[0] if sectors else candidates[0]
+
+        seen_ids: set[str] = set()
+        all_rows: list[dict] = []
+
+        for kw in dict.fromkeys(candidates):  # deduplicated, order-preserving
             rows = self.neo4j.run_query(
-                GET_CAPABILITIES_BROAD,
-                keyword=keyword,
+                GET_ENRICHED_CAPABILITIES_FOR_DOMAIN,
+                org_keyword=kw,
+                sector_keyword=sector_kw,
                 limit=limit,
             )
-        return rows
+            if not rows:
+                rows = self.neo4j.run_query(
+                    GET_CAPABILITIES_BROAD, keyword=kw, limit=limit,
+                )
+            for r in rows:
+                cap_id = (r.get("capability") or {}).get("id")
+                if cap_id and cap_id not in seen_ids:
+                    seen_ids.add(cap_id)
+                    all_rows.append(r)
+            if len(all_rows) >= limit:
+                break
+
+        return all_rows
 
     def _merge_results(
         self,
@@ -251,7 +280,8 @@ class RetrieverAgent:
         log.info(f"Expanded queries: {queries}")
 
         vector_rows = self._vector_search(queries, top_k=20)
-        cypher_rows = self._cypher_traversal(org_type, sectors, limit=40)
+        cypher_rows = self._cypher_traversal(org_type, sectors, limit=40,
+                                              expanded_queries=queries)
 
         caps = self._merge_results(cypher_rows, vector_rows, max_caps=top_k)
         log.info(f"Retriever: {len(caps)} enriched capabilities merged")

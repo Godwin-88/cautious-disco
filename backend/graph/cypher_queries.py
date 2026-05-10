@@ -503,6 +503,29 @@ WHERE d.name IN $domain_names AND d.id <> '__hub__'
 RETURN d.name AS name, coalesce(d.drl_trained, false) AS trained
 """
 
+GET_DOMAIN_FULL_DETAIL = """
+MATCH (d:Domain {name: $domain_name}) WHERE d.id <> '__hub__'
+OPTIONAL MATCH (d)-[:GOVERNED_BY]->(std:Standard)
+OPTIONAL MATCH (d)-[:INFLUENCED_BY]->(trend:Trend)
+WITH d, std, trend
+OPTIONAL MATCH (d)-[:PARENT_OF]->(sd:SubDomain)-[:PARENT_OF]->(c:Capability)
+OPTIONAL MATCH (c)-[:PARENT_OF]->(subcap:SubCapability)
+RETURN
+  d {.name, .sector, .drl_trained, .drl_final_reward}                       AS domain,
+  std {.name, .full_name, .publisher, .version, .description,
+       .key_principles, .compliance_requirements, .source_url}               AS standard,
+  trend {.name, .description, .impact_level, .maturity,
+         .time_horizon, .business_impact, .technology_enablers,
+         .adoption_rate}                                                      AS trend,
+  sd {.id, .name, .description, .functional_scope,
+      .business_driver, .grouping_rationale}                                 AS subdomain,
+  c {.id, .name, .description, .business_outcomes, .risk_factors,
+     .kpis, .typical_duration_weeks, .implementation_complexity,
+     .common_frameworks, .solution_patterns,
+     .technical_requirements}                                                 AS capability,
+  [x IN collect(DISTINCT subcap.name) WHERE x IS NOT NULL]                   AS subcapability_names
+"""
+
 GET_ARCHIMATE_CAPABILITIES = """
 MATCH (d:Domain)-[:PARENT_OF]->(sd:SubDomain)-[:PARENT_OF]->(c:Capability)
 WHERE d.id <> '__hub__'

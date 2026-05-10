@@ -8,6 +8,7 @@ from backend.graph.cypher_queries import (
     GET_ALL_DOMAINS,
     GET_CAPABILITIES_FOR_DOMAIN,
     GET_DOMAIN_STATS,
+    GET_DOMAIN_FULL_DETAIL,
 )
 
 router = APIRouter()
@@ -80,6 +81,48 @@ async def list_subdomains(
         }
         for r in rows
     ]
+
+
+@router.get("/graph/domain-detail")
+async def domain_detail(
+    domain_name: str,
+    neo4j: Annotated[Neo4jClient, Depends(get_neo4j_client)],
+):
+    rows = neo4j.run_query(GET_DOMAIN_FULL_DETAIL, domain_name=domain_name)
+    if not rows:
+        return {"domain": {}, "standard": None, "trend": None, "subdomain_groups": []}
+
+    domain = rows[0].get("domain") or {}
+    standard = rows[0].get("standard")
+    trend = rows[0].get("trend")
+
+    subdomain_map: dict = {}
+    for r in rows:
+        sd = r.get("subdomain") or {}
+        sd_id = sd.get("id")
+        if not sd_id:
+            continue
+        if sd_id not in subdomain_map:
+            subdomain_map[sd_id] = {"subdomain": sd, "capabilities": []}
+        cap = r.get("capability") or {}
+        if cap.get("id"):
+            cap["subcapability_names"] = r.get("subcapability_names") or []
+            subdomain_map[sd_id]["capabilities"].append(cap)
+
+    # Sort subdomain groups and capabilities within each group alphabetically
+    groups = sorted(
+        subdomain_map.values(),
+        key=lambda g: (g["subdomain"].get("name") or "").lower(),
+    )
+    for g in groups:
+        g["capabilities"].sort(key=lambda c: (c.get("name") or "").lower())
+
+    return {
+        "domain": domain,
+        "standard": standard,
+        "trend": trend,
+        "subdomain_groups": groups,
+    }
 
 
 @router.get("/subdomain-capabilities")
