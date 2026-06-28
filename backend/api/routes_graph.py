@@ -9,6 +9,7 @@ from backend.graph.cypher_queries import (
     GET_CAPABILITIES_FOR_DOMAIN,
     GET_DOMAIN_STATS,
     GET_DOMAIN_FULL_DETAIL,
+    GET_ENABLES_GRAPH,
 )
 
 router = APIRouter()
@@ -50,6 +51,15 @@ async def list_capabilities(
 async def graph_stats(neo4j: Annotated[Neo4jClient, Depends(get_neo4j_client)]):
     rows = neo4j.run_query(GET_DOMAIN_STATS)
     return {"node_counts": {r["label"]: r["count"] for r in rows}}
+
+
+@router.get("/graph/enables")
+async def enables_graph(neo4j: Annotated[Neo4jClient, Depends(get_neo4j_client)]):
+    rows = neo4j.run_query(GET_ENABLES_GRAPH)
+    return [
+        {"source": r["source"], "target": r["target"]}
+        for r in rows
+    ]
 
 
 @router.get("/graph/network")

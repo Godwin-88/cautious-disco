@@ -14,6 +14,7 @@ class AnalyzeRequest(BaseModel):
     current_capabilities: list[str] = Field(default_factory=list, description="Capability IDs already in place")
     selected_capability_ids: list[str] = Field(default_factory=list, description="Direct capability IDs from questionnaire — bypasses vector search")
     selected_subdomain_ids: list[str] = Field(default_factory=list, description="Direct subdomain IDs from questionnaire")
+    mode: Literal["graphrag", "maturity_baseline", "drl_prioritise", "generate_recommendation", "regenerate"] | None = Field(default=None, description="Pipeline execution mode for partial runs")
 
     model_config = {
         "json_schema_extra": {

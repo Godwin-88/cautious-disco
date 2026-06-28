@@ -1,13 +1,3 @@
-export const TABS = [
-  "EA Advisor",
-  "Graph Explorer",
-  "Strategic Roadmap",
-  "Initiatives & Scenarios",
-  "Integrations",
-  "Export & Handover",
-  "AI Learning Engine",
-] as const;
-
 export const DOMAIN_OVERRIDES: Record<string, string> = {
   "Manage Generic Core": "Enterprise Architecture Core",
   "Manage Digital Intelligence": "Digital Intelligence & Data",
@@ -65,7 +55,7 @@ export const LABELS: Record<string, string> = {
   trend_alignment: "Innovation Alignment",
   strategic_rationale: "Strategic Rationale",
   business_value: "Business Value",
-  drl_used_true: "AMD-Powered AI Prioritisation",
+  drl_used_true: "AI-Powered Prioritisation",
   drl_used_false: "Heuristic Prioritisation",
   drl_trace: "AI Capability Prioritisation",
   "[Compliance]": "Regulatory Obligation",

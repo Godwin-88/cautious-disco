@@ -5,13 +5,16 @@ import { domainLabel, subdomainLabel } from "@/lib/terminology";
 
 type Node = { id: string; name: string; sector: string; drl_trained?: boolean };
 type Edge = { source: string; target: string; type: string };
+type EnablesEdge = { source: string; target: string };
 
 export default function GraphExplorerTab() {
   const networkRef = useRef<HTMLDivElement>(null);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [enablesEdges, setEnablesEdges] = useState<EnablesEdge[]>([]);
   const [selectedDomain, setSelectedDomain] = useState("");
   const [detail, setDetail] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<"network" | "enables">("network");
 
   useEffect(() => {
     fetch("/api/backend/graph/network")
@@ -24,6 +27,15 @@ export default function GraphExplorerTab() {
   }, []);
 
   useEffect(() => {
+    if (viewMode === "enables") {
+      fetch("/api/backend/graph/enables")
+        .then((r) => r.json())
+        .then(setEnablesEdges)
+        .catch(() => setEnablesEdges([]));
+    }
+  }, [viewMode]);
+
+  useEffect(() => {
     if (!selectedDomain || !nodes.length) return;
     fetch(`/api/backend/graph/domain-detail?domain_name=${encodeURIComponent(selectedDomain)}`)
       .then((r) => r.json())
@@ -32,11 +44,16 @@ export default function GraphExplorerTab() {
   }, [selectedDomain]);
 
   useEffect(() => {
-    if (!networkRef.current || nodes.length === 0) return;
+    if (!networkRef.current) return;
 
     import("vis-network").then(({ Network }) => {
       const container = networkRef.current!;
       container.innerHTML = "";
+      
+      if (nodes.length === 0) return;
+
+      const displayEdges = viewMode === "enables" ? enablesEdges : edges;
+      
       const datasetNodes = new (window as any).vis.DataSet(
         nodes.map((n) => ({
           id: n.id,
@@ -46,12 +63,13 @@ export default function GraphExplorerTab() {
         }))
       );
       const datasetEdges = new (window as any).vis.DataSet(
-        edges.map((e, i) => ({
+        displayEdges.map((e, i) => ({
           id: i,
           from: e.source,
           to: e.target,
-          label: e.type,
+          label: viewMode === "enables" ? "enables" : (e as Edge).type,
           arrows: "to",
+          color: { color: viewMode === "enables" ? "#f39c12" : "#888" },
         }))
       );
       new Network(container, { nodes: datasetNodes, edges: datasetEdges }, {
@@ -62,15 +80,32 @@ export default function GraphExplorerTab() {
     }).catch(() => {
       if (networkRef.current) networkRef.current.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500">vis-network unavailable</div>`;
     });
-  }, [nodes, edges]);
+  }, [nodes, edges, enablesEdges, viewMode]);
 
   const friendlyNames = nodes.map((n) => domainLabel(n.name));
+  const edgeCount = viewMode === "enables" ? enablesEdges.length : edges.length;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-white">Knowledge Graph Explorer</h2>
-        <p className="text-gray-400 text-sm">Live network of 44 enterprise domains — nodes sized by DRL training status, colored by sector, edges show inter-domain relationships</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Knowledge Graph Explorer</h2>
+          <p className="text-gray-400 text-sm">Live network of 44 enterprise domains — nodes sized by AI training status, colored by sector</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setViewMode("network")}
+            className={`px-3 py-1 rounded text-xs ${viewMode === "network" ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400"}`}
+          >
+            Network View
+          </button>
+          <button
+            onClick={() => setViewMode("enables")}
+            className={`px-3 py-1 rounded text-xs ${viewMode === "enables" ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400"}`}
+          >
+            ENABLES View
+          </button>
+        </div>
       </div>
 
       <div className="bg-[#161920] border border-gray-800 rounded-lg p-4">
@@ -83,8 +118,8 @@ export default function GraphExplorerTab() {
           <div className="text-xs text-gray-400">Domains</div>
         </div>
         <div className="bg-[#161920] border border-gray-800 rounded p-4 text-center">
-          <div className="text-2xl font-bold text-white">{edges.length}</div>
-          <div className="text-xs text-gray-400">Relationships</div>
+          <div className="text-2xl font-bold text-white">{edgeCount}</div>
+          <div className="text-xs text-gray-400">{viewMode === "enables" ? "ENABLES Links" : "Relationships"}</div>
         </div>
         <div className="bg-[#161920] border border-gray-800 rounded p-4 text-center">
           <div className="text-2xl font-bold text-white">{new Set(nodes.map((n) => n.sector).filter(Boolean)).size}</div>

@@ -12,14 +12,26 @@ class Settings(BaseSettings):
     neo4j_password: str = "your-password"
     neo4j_database: str = "neo4j"
 
-    # LLM — primary (vLLM on AMD MI300X)
+    # LLM — primary (vLLM)
     vllm_base_url: str = "http://localhost:8000/v1"
     vllm_model: str = "Qwen/Qwen2.5-72B-Instruct"
     llm_timeout: int = 120
     llm_max_tokens: int = 4096
     llm_temperature: float = 0.3
 
-    # LLM — fallback (Together.ai / public API)
+    # LLM — fallback chain (Groq → Gemini → OpenRouter)
+    groq_api_key: str = ""
+    groq_model: str = "llama-3.3-70b-versatile"
+    groq_base_url: str = "https://api.groq.com/openai/v1"
+
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-2.0-flash"
+
+    openrouter_api_key: str = ""
+    openrouter_model: str = "google/gemini-2.0-flash"
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
+
+    # Legacy fallback (deprecated in favor of multi-provider chain)
     fallback_api_key: str = ""
     fallback_base_url: str = "https://api.together.xyz/v1"
     fallback_model: str = "Qwen/Qwen2.5-72B-Instruct-Turbo"
@@ -34,7 +46,7 @@ class Settings(BaseSettings):
     # App
     cors_origins: list[str] = ["*"]
     log_level: str = "INFO"
-    app_title: str = "EA Optimizer — AMD-Powered Agentic AI"
+    app_title: str = "EA Optimizer"
     app_version: str = "1.0.0"
 
     class Config:

@@ -45,7 +45,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       {
         role: "assistant",
         content:
-          "Hello! I'm your **Enterprise Architecture Advisor**, powered by **AMD MI300X** and **Qwen-72B** with live access to a knowledge graph of **1,416 capabilities across 44 domains**.\n\nI can help you:\n- Explore governance standards and compliance requirements\n- Identify the right capabilities for your organisation\n- Understand cross-domain architecture patterns\n- Generate a strategic transformation roadmap\n\nWhat would you like to explore?",
+          "Hello! I'm your **Enterprise Architecture Advisor** with live access to a knowledge graph of **capabilities across 44 domains**.\n\nI can help you:\n- Explore governance standards and compliance requirements\n- Identify the right capabilities for your organisation\n- Understand cross-domain architecture patterns\n- Generate a strategic transformation roadmap\n\nWhat would you like to explore?",
       },
     ]);
     setLastChatSources([]);

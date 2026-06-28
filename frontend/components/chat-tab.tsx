@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useChat } from "@/lib/context";
 
 const WELCOME =
-  "Hello! I'm your **Enterprise Architecture Advisor**, powered by **AMD MI300X** and **Qwen-72B** with live access to a knowledge graph of **1,416 capabilities across 44 domains**.\n\nI can help you:\n- Explore governance standards and compliance requirements\n- Identify the right capabilities for your organisation\n- Understand cross-domain architecture patterns\n- Generate a strategic transformation roadmap\n\nWhat would you like to explore?";
+  "Hello! I'm your **Enterprise Architecture Advisor** with live access to a knowledge graph of **capabilities across 44 domains**.\n\nI can help you:\n- Explore governance standards and compliance requirements\n- Identify the right capabilities for your organisation\n- Understand cross-domain architecture patterns\n- Generate a strategic transformation roadmap\n\nWhat would you like to explore?";
 
 const ROADMAP_KEYWORDS = new Set([
   "roadmap", "strategy", "strategic", "plan", "planning",
@@ -191,7 +191,7 @@ export default function ChatTab() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-white">EA Advisor</h2>
-        <p className="text-gray-400 text-sm">Conversational AI for enterprise architecture — AMD MI300X · Qwen-72B · Knowledge Graph RAG · 1,416 capabilities</p>
+        <p className="text-gray-400 text-sm">Conversational AI for enterprise architecture — Knowledge Graph RAG · 1,416 capabilities</p>
       </div>
 
       <div className="flex gap-6">
