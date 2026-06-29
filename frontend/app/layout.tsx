@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Raleway } from "next/font/google";
 import "./globals.css";
 import { ChatProvider } from "@/lib/context";
 
-const inter = Inter({ subsets: ["latin"] });
+const raleway = Raleway({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "UiPath EA Orchestrator",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-[#0e1117] text-gray-100`}>
+      <body className={`${raleway.className} bg-[#0e1117] text-gray-100`}>
         <ChatProvider>
           <div className="min-h-screen">{children}</div>
         </ChatProvider>
