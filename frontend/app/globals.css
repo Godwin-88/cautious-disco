@@ -1,1 +1,164 @@
 @import "tailwindcss";
+@import "bpmn-js/dist/assets/diagram-js.css";
+@import "bpmn-js/dist/assets/bpmn-js.css";
+
+:root {
+  --bg-primary: #111827;
+  --bg-secondary: #161920;
+  --border-color: #374151;
+  --text-primary: #e5e7eb;
+  --text-secondary: #9ca3af;
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+
+  /* ---- bpmn-js CSS Custom Properties (dark theme) ---- */
+  --palette-entry-color: #e5e7eb;
+  --palette-entry-hover-color: #60a5fa;
+  --palette-entry-selected-color: #3b82f6;
+  --palette-background-color: #161920;
+  --palette-border-color: #374151;
+  --palette-separator-color: #374151;
+  --palette-toggle-hover-background-color: #374151;
+  --canvas-background-color: #111827;
+  --canvas-fill-color: #161920;
+  --canvas-stroke-color: #e5e7eb;
+  --canvas-selected-stroke-color: #3b82f6;
+  --canvas-hover-stroke-color: #60a5fa;
+}
+
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --border-color: #d1d5e7;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --accent: #2563eb;
+  --accent-hover: #3b82f6;
+  --palette-entry-color: #4b5563;
+  --palette-entry-hover-color: #2563eb;
+  --palette-entry-selected-color: #2563eb;
+  --palette-background-color: #f9fafb;
+  --palette-border-color: #d1d5e7;
+  --palette-separator-color: #d1d5e7;
+  --palette-toggle-hover-background-color: #e5e7eb;
+  --canvas-background-color: #ffffff;
+  --canvas-fill-color: #f9fafb;
+  --canvas-stroke-color: #4b5563;
+  --canvas-selected-stroke-color: #2563eb;
+  --canvas-hover-stroke-color: #3b82f6;
+}
+
+/* Palette styling */
+.djs-palette {
+  background: var(--palette-background-color) !important;
+  border-right: 1px solid var(--palette-border-color) !important;
+  border-radius: 0 !important;
+  width: 48px !important;
+}
+.djs-palette .entry {
+  font-size: 22px !important;
+  color: var(--palette-entry-color) !important;
+  height: 42px !important;
+  width: 46px !important;
+  line-height: 42px !important;
+}
+.djs-palette .entry:hover {
+  background: var(--palette-toggle-hover-background-color) !important;
+  color: var(--palette-entry-hover-color) !important;
+}
+.djs-palette .entry.selected {
+  color: var(--palette-entry-selected-color) !important;
+}
+.djs-palette .djs-palette-toggle {
+  color: var(--palette-entry-color) !important;
+  background: var(--palette-background-color) !important;
+}
+.djs-palette .djs-palette-toggle:hover {
+  background: var(--palette-toggle-hover-background-color) !important;
+}
+
+/* Container styling */
+.djs-container {
+  background: var(--canvas-background-color) !important;
+}
+.djs-canvas {
+  background: var(--canvas-background-color) !important;
+}
+
+/* Element styling */
+.djs-element .djs-visual > :not(.djs-outline) {
+  fill: var(--canvas-fill-color) !important;
+  stroke: var(--canvas-stroke-color) !important;
+  stroke-width: 1.5 !important;
+}
+.djs-element.selected .djs-visual > :not(.djs-outline) {
+  stroke: var(--canvas-selected-stroke-color) !important;
+  stroke-width: 2.5 !important;
+}
+.djs-element.hover .djs-visual > :not(.djs-outline) {
+  stroke: var(--canvas-hover-stroke-color) !important;
+  stroke-width: 2.5 !important;
+}
+.djs-outline {
+  stroke: var(--canvas-selected-stroke-color) !important;
+  stroke-width: 2px !important;
+  fill: none !important;
+}
+
+/* Text styling */
+.djs-element .djs-visual text {
+  fill: var(--text-primary) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+.djs-element .djs-visual tspan {
+  fill: var(--text-primary) !important;
+  font-size: 11px !important;
+}
+.bpmn-label text,
+.djs-label text,
+.djs-label tspan {
+  fill: var(--text-primary) !important;
+  font-size: 11px !important;
+}
+
+/* Arrow styling */
+.djs-element .djs-visual path[stroke] {
+  stroke: var(--canvas-stroke-color) !important;
+}
+.djs-element .djs-visual polygon[stroke] {
+  stroke: var(--canvas-stroke-color) !important;
+  fill: var(--canvas-stroke-color) !important;
+}
+
+/* Context pad and popup styling */
+.djs-context-pad {
+  background: var(--palette-background-color) !important;
+  border: 1px solid var(--palette-border-color) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+}
+.djs-context-pad .entry {
+  color: var(--palette-entry-color) !important;
+}
+.djs-context-pad .entry:hover {
+  background: var(--palette-toggle-hover-background-color) !important;
+}
+.djs-popup {
+  background: var(--palette-background-color) !important;
+  border: 1px solid var(--palette-border-color) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+}
+.djs-popup .entry {
+  color: var(--palette-entry-color) !important;
+}
+.djs-popup .entry:hover {
+  background: var(--palette-toggle-hover-background-color) !important;
+  color: var(--palette-entry-hover-color) !important;
+}
+
+/* Hide powered-by */
+.bjs-powered-by {
+  display: none !important;
+}

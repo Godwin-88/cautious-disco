@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 const SAMPLE_CSV = `org_type,business_unit,system_name,vendor,capabilities_in_use,annual_budget_usd\nEnterprise Bank,Finance,SAP S/4HANA,SAP,"General Ledger Management,Financial Reporting",2400000\n`;
 
-export default function IntegrationsTab({ result }: { result: any }) {
+export default function IntegrationsTab({ result }: { result?: any }) {
   const [jiraUrl, setJiraUrl] = useState("");
   const [jiraEmail, setJiraEmail] = useState("");
   const [jiraToken, setJiraToken] = useState("");

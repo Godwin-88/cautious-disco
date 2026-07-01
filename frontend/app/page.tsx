@@ -3,17 +3,18 @@
 import { useState, useEffect } from "react";
 import { useChat } from "@/lib/context";
 import SidebarNav from "@/components/sidebar-nav";
-import ChatTab from "@/components/chat-tab";
-import GraphExplorerTab from "@/components/graph-explorer-tab";
 import InputForm from "@/components/input-form";
 import RoadmapTab from "@/components/roadmap-tab";
 import IntegrationsTab from "@/components/integrations-tab";
 import TrainingTab from "@/components/training-tab";
 import HumanTaskPortal from "@/components/human-task-portal";
-import ExportTab from "@/components/export-tab";
+import dynamic from "next/dynamic";
+
+const NetworkGraph = dynamic(() => import("@/components/enables-network-graph"), { ssr: false });
+const BpmnStudioPage = dynamic(() => import("./bpmn-studio/page"), { ssr: false });
 
 export default function Home() {
-  const [activeView, setActiveView] = useState<"process" | "agents" | "review" | "graph" | "learning" | "settings" | "export">("process");
+  const [activeView, setActiveView] = useState<"canvas" | "assessments" | "bpmn" | "review" | "analytics" | "settings">("canvas");
   const { result, setResult } = useChat();
 
   const handleAnalyze = async (payload: any) => {
@@ -28,58 +29,44 @@ export default function Home() {
 
   const renderView = () => {
     switch (activeView) {
-      case "process":
+      case "canvas":
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-white">Process Flow Dashboard</h2>
-              <p className="text-gray-400 text-sm">Monitor and orchestrate BPMN processes across humans, agents, and APIs</p>
+              <h2 className="text-2xl font-bold text-white">Canvas Explorer</h2>
+              <p className="text-gray-400 text-sm">44-domain capability hierarchy, ENABLES network graph, and gap heatmap</p>
             </div>
-            <ProcessFlowView />
+            <CanvasView result={result} onAnalyze={handleAnalyze} />
           </div>
         );
-      case "agents":
+      case "assessments":
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-white">AI Agents</h2>
-              <p className="text-gray-400 text-sm">Conversational AI for capability analysis and roadmap generation</p>
+              <h2 className="text-2xl font-bold text-white">Assessments Dashboard</h2>
+              <p className="text-gray-400 text-sm">All past and in-progress capability assessments</p>
             </div>
-            <ChatTab />
-            {!result && <InputForm onSubmit={handleAnalyze} />}
-            {result && (
-              <div className="mt-8">
-                <RoadmapTab result={result} />
-              </div>
-            )}
+            <AssessmentsView setResult={setResult} />
           </div>
         );
+      case "bpmn":
+        return <div className="h-screen"><BpmnStudioPage /></div>;
       case "review":
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-white">Human Review & Approval</h2>
-              <p className="text-gray-400 text-sm">Review AI-generated assessments and provide human oversight decisions</p>
+              <h2 className="text-2xl font-bold text-white">Review Portal</h2>
+              <p className="text-gray-400 text-sm">Human-in-the-loop review and approval of AI-generated roadmaps</p>
             </div>
             <HumanTaskPortal />
           </div>
         );
-      case "graph":
+      case "analytics":
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-white">Knowledge Graph Explorer</h2>
-              <p className="text-gray-400 text-sm">Explore cross-domain relationships and capability mappings</p>
-            </div>
-            <GraphExplorerTab />
-          </div>
-        );
-      case "learning":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-white">AI Learning Engine</h2>
-              <p className="text-gray-400 text-sm">Train and monitor AI models for capability prioritisation</p>
+              <h2 className="text-2xl font-bold text-white">Analytics</h2>
+              <p className="text-gray-400 text-sm">Platform metrics and assessment analytics</p>
             </div>
             <TrainingTab />
           </div>
@@ -91,17 +78,7 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-white">Settings</h2>
               <p className="text-gray-400 text-sm">Configure integrations and system connections</p>
             </div>
-            <IntegrationsTab result={result} />
-          </div>
-        );
-      case "export":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-white">Export & Handover</h2>
-              <p className="text-gray-400 text-sm">Export roadmap outputs to Jira, ServiceNow, and other platforms</p>
-            </div>
-            <ExportTab result={result} />
+            <IntegrationsTab />
           </div>
         );
       default:
@@ -119,40 +96,162 @@ export default function Home() {
   );
 }
 
-function ProcessFlowView() {
-  const [processes, setProcesses] = useState<any[]>([]);
+function CanvasView({ result, onAnalyze }: { result: any; onAnalyze: (payload: any) => void }) {
+  const [domains, setDomains] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("/api/backend/uipath/processes")
+    fetch("/api/backend/domains")
       .then((r) => r.json())
-      .then(setProcesses)
-      .catch(() => setProcesses([]));
+      .then((data) => setDomains(Array.isArray(data) ? data : []))
+      .catch(() => setDomains([]));
   }, []);
+
+  const filtered = domains.filter(d => 
+    d.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold text-white mb-4">Assessment Intake</h3>
+        {!result ? (
+          <InputForm onSubmit={onAnalyze} />
+        ) : (
+          <div className="flex gap-2">
+            <button 
+              onClick={() => {
+                const a = document.createElement('a');
+                a.href = 'data:application/xml,' + encodeURIComponent(result.bpmn_xml || '');
+                a.download = 'roadmap.bpmn';
+                a.click();
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm"
+            >
+              Export BPMN
+            </button>
+            <button 
+              onClick={() => {}}
+              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm"
+            >
+              View Report
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div>
+        <h3 className="text-lg font-semibold text-white mb-3">Domain Hierarchy</h3>
+        <div className="relative mb-3">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search domains..."
+            className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div className="bg-[#161920] border border-gray-800 rounded-lg p-4">
+          <div className="grid grid-cols-3 md:grid-cols-5 gap-3 max-h-[300px] overflow-y-auto">
+            {filtered.map((d) => (
+              <button
+                key={d.id}
+                className="p-3 rounded border border-gray-700 bg-gray-900 hover:bg-gray-800 text-left"
+              >
+                <div className="text-sm font-medium text-white truncate">{d.name.replace("Manage ", "")}</div>
+                <div className="text-xs text-gray-500">{d.capability_count || 0} capabilities</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-semibold text-white mb-3">ENABLES Network Graph</h3>
+        <NetworkGraph />
+      </div>
+
+      {result && (
+        <div className="mt-6">
+          <RoadmapTab result={result} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AssessmentsView({ setResult }: { setResult: (r: any) => void }) {
+  const [assessments, setAssessments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/backend/assessments")
+      .then((r) => r.json())
+      .then(setAssessments)
+      .catch(() => setAssessments([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "COMPLETE": return "bg-green-900 text-green-300";
+      case "AWAITING_REVIEW": return "bg-orange-900 text-orange-300";
+      case "RUNNING": return "bg-blue-900 text-blue-300";
+      case "FAILED": return "bg-red-900 text-red-300";
+      default: return "bg-gray-800 text-gray-400";
+    }
+  };
 
   return (
     <div className="space-y-4">
-      {processes.length === 0 ? (
-        <div className="bg-[#161920] border border-gray-800 rounded-lg p-6">
-          <div className="text-center text-gray-500 py-8">
-            <div className="text-4xl mb-2">🔄</div>
-            <p>No active processes. Run an assessment to create a BPMN workflow.</p>
-            <p className="text-xs mt-2 text-gray-600">Navigate to AI Agents to start capability analysis.</p>
-          </div>
+      {loading && <p className="text-gray-400">Loading assessments...</p>}
+
+      {!loading && assessments.length === 0 && (
+        <div className="bg-[#161920] border border-gray-800 rounded-lg p-6 text-center">
+          <p className="text-gray-500">No assessments yet. Run an assessment in Canvas to generate a roadmap.</p>
         </div>
-      ) : (
-        processes.map((p, i) => (
-          <div key={i} className="bg-[#161920] border border-gray-800 rounded-lg p-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold text-white">{p.name}</h3>
-                <p className="text-xs text-gray-400 mt-1">{p.description}</p>
-              </div>
-              <span className={`text-xs px-2 py-1 rounded ${p.status === "running" ? "bg-blue-900 text-blue-300" : "bg-gray-800 text-gray-400"}`}>
-                {p.status}
-              </span>
-            </div>
-          </div>
-        ))
+      )}
+
+      {assessments.length > 0 && (
+        <div className="bg-[#161920] border border-gray-800 rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-900">
+              <tr>
+                <th className="text-left px-4 py-3 text-gray-300 font-medium">Org Name</th>
+                <th className="text-left px-4 py-3 text-gray-300 font-medium">Sector</th>
+                <th className="text-left px-4 py-3 text-gray-300 font-medium">Date</th>
+                <th className="text-left px-4 py-3 text-gray-300 font-medium">Status</th>
+                <th className="text-left px-4 py-3 text-gray-300 font-medium">Score</th>
+                <th className="text-left px-4 py-3 text-gray-300 font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {assessments.map((a) => (
+                <tr key={a.assessment_id} className="border-t border-gray-800 hover:bg-gray-800/30">
+                  <td className="px-4 py-3 text-white">{a.org_name}</td>
+                  <td className="px-4 py-3 text-gray-300">{a.org_sector}</td>
+                  <td className="px-4 py-3 text-gray-400">{a.created_at?.slice(0, 10) || "—"}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded text-xs ${getStatusColor(a.status)}`}>
+                      {a.status.replace("_", " ")}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-white font-mono">
+                    {a.compliance_score ? `${a.compliance_score.toFixed(0)}%` : "—"}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => setResult(a)}
+                      className="text-xs text-blue-400 hover:text-blue-300"
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

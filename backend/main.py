@@ -87,6 +87,7 @@ def create_app() -> FastAPI:
     from backend.api.routes_chat import router as chat_router
     from backend.api.routes_integrations import router as integrations_router
     from backend.api.routes_uipath import router as uipath_router
+    from backend.api.routes_bpmn import router as bpmn_router
 
     app.include_router(health_router, prefix="/api/v1", tags=["health"])
     app.include_router(graph_router, prefix="/api/v1", tags=["graph"])
@@ -95,6 +96,7 @@ def create_app() -> FastAPI:
     app.include_router(chat_router, prefix="/api/v1", tags=["chat"])
     app.include_router(integrations_router, prefix="/api/v1", tags=["integrations"])
     app.include_router(uipath_router, prefix="/api/v1", tags=["uipath"])
+    app.include_router(bpmn_router, prefix="/api/v1", tags=["bpmn"])
 
     return app
 

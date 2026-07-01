@@ -368,7 +368,7 @@ RETURN
        .kpis, .typical_duration_weeks, .implementation_complexity,
        .common_frameworks, .solution_patterns, .technical_requirements} AS capability,
   subdomain {.id, .name, .description, .functional_scope, .business_driver,
-             .grouping_rationale}                                        AS subdomain,
+           .grouping_rationale}                                        AS subdomain,
   domain {.id, .name}                                                   AS domain,
   std {.id, .name, .full_name, .publisher, .version, .key_principles,
        .compliance_requirements}                                         AS standard,
@@ -376,6 +376,30 @@ RETURN
          .technology_enablers}                                           AS trend,
   subcapabilities
 ORDER BY domain.name, subdomain.name, cap.name
+"""
+
+GET_ENHANCED_CAPABILITIES_BY_IDS = """
+MATCH (cap:Capability)
+WHERE cap.id IN $capability_ids
+MATCH (cap)<-[:PARENT_OF]-(subdomain:SubDomain)<-[:PARENT_OF]-(domain:Domain)
+  WHERE domain.id <> '__hub__'
+OPTIONAL MATCH (domain)-[:GOVERNED_BY]->(std:Standard)
+OPTIONAL MATCH (domain)-[:INFLUENCED_BY]->(trend:Trend)
+OPTIONAL MATCH (cap)-[:PARENT_OF]->(subcap:SubCapability)
+OPTIONAL MATCH (domain)-[:ENABLES]->(downstream:Domain)
+WITH cap, subdomain, domain, std, trend,
+     collect(DISTINCT subcap {.id, .name, .description}) AS subcapabilities,
+     count(DISTINCT downstream) AS enables_count
+RETURN
+  cap {.id, .name, .description, .business_outcomes, .risk_factors,
+       .kpis, .typical_duration_weeks, .implementation_complexity} AS capability,
+  subdomain {.id, .name}                                         AS subdomain,
+  domain {.id, .name}                                           AS domain,
+  std {.id, .name, .publisher}                                  AS standard,
+  trend {.id, .name, .source, .impact_level}                     AS trend,
+  subcapabilities,
+  enables_count
+ORDER BY domain.name, cap.name
 """
 
 # ---------------------------------------------------------------------------

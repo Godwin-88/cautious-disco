@@ -2,14 +2,16 @@
 
 import csv
 import io
+import json
 import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from pydantic import BaseModel
 
-from backend.dependencies import get_neo4j_client
+from backend.dependencies import get_neo4j_client, get_llm_client
 from backend.graph.neo4j_client import Neo4jClient
+from backend.llm.client import LLMClient, extract_json
 from backend.graph.cypher_queries import GET_ARCHIMATE_CAPABILITIES
 
 log = logging.getLogger(__name__)
@@ -41,7 +43,6 @@ async def jira_export(req: JiraExportRequest):
     async with httpx.AsyncClient(auth=auth, headers=headers, timeout=30) as client:
         for phase in req.phases:
             for epic in (phase.get("epics") or []):
-                # Create Epic
                 epic_payload = {
                     "fields": {
                         "project": {"key": req.project_key},
@@ -63,7 +64,6 @@ async def jira_export(req: JiraExportRequest):
                         if not first_epic_key:
                             first_epic_key = epic_key
                         created_epics += 1
-                        # Create Stories (features → user stories)
                         for feat in (epic.get("features") or []):
                             for story in (feat.get("user_stories") or []):
                                 role = story.get("role", "user")
@@ -79,7 +79,7 @@ async def jira_export(req: JiraExportRequest):
                                             "type": "doc", "version": 1,
                                             "content": [{"type": "paragraph", "content": [
                                                 {"type": "text",
-                                                 "text": f"So that {so_that}\n\nAcceptance Criteria:\n{ac_text}"}
+                                                   "text": f"So that {so_that}\n\nAcceptance Criteria:\n{ac_text}"}
                                             ]}]
                                         },
                                         "issuetype": {"name": "Story"},
@@ -111,7 +111,7 @@ async def jira_export(req: JiraExportRequest):
 # ── ITSM Mock ────────────────────────────────────────────────────────────────
 
 class ITSMConnectRequest(BaseModel):
-    tool: str   # "servicenow" | "azure_devops"
+    tool: str
     instance_url: str
     credentials: dict = {}
 
@@ -235,13 +235,10 @@ def _classify_layer(cap: dict) -> str:
     tech_reqs = " ".join(cap.get("technical_requirements") or []).lower()
     combined = f"{name_lower} {desc_lower} {frameworks} {tech_reqs}"
 
-    # Technology layer check first
     if any(kw in combined for kw in _TECHNOLOGY_KEYWORDS):
         return "technology"
-    # Business layer
     if any(kw in combined for kw in _BUSINESS_KEYWORDS) or outcomes:
         return "business"
-    # Default: application layer
     return "application"
 
 
@@ -264,3 +261,56 @@ async def archimate_view(
         })
 
     return result
+
+
+# ── Natural Language Graph Query ─────────────────────────────────────────────
+
+class NLQueryRequest(BaseModel):
+    question: str
+
+
+@router.post("/graph/query")
+async def natural_language_query(
+    req: NLQueryRequest,
+    neo4j: Annotated[Neo4jClient, Depends(get_neo4j_client)],
+    llm: Annotated[LLMClient, Depends(get_llm_client)],
+):
+    prompt = f"""You are a Neo4j Cypher expert. Given the question, generate ONLY a valid Cypher query.
+
+Schema:
+- Domain: id, name
+- SubDomain: id, name, domain_id
+- Capability: id, name, description, subdomain_id
+- Relationships: PARENT_OF, ENABLES, GOVERNED_BY, INFLUENCED_BY, REPRESENTED_BY, HAS_SECTOR, HAS_FEATURE
+
+Rules:
+- No DELETE, DETACH, or schema mutations allowed
+- Return only the Cypher query string, no markdown or commentary
+
+Question: {req.question}"""
+
+    try:
+        raw = await llm.chat([{"role": "user", "content": prompt}], max_tokens=512, temperature=0.3)
+        cypher = extract_json(raw)
+        if isinstance(cypher, str):
+            cypher = cypher.strip()
+        else:
+            cypher = raw.strip() if raw else ""
+
+        if any(kw in (cypher or "").upper() for kw in ["DELETE", "DETACH", "CREATE", "SET", "MERGE"]):
+            raise ValueError("Write operations not allowed")
+
+        result = neo4j.run_query(cypher)
+
+        explain_prompt = f"Explain this graph query result in 2-3 sentences: {cypher[:100]}... Found {len(result) if isinstance(result, list) else 0} results."
+        explanation = await llm.chat([{"role": "user", "content": explain_prompt}], max_tokens=256, temperature=0.5)
+
+        return {
+            "question": req.question,
+            "cypher": cypher,
+            "result": result,
+            "explanation": explanation,
+        }
+    except Exception as exc:
+        log.exception("Graph query failed")
+        raise HTTPException(status_code=400, detail=str(exc))

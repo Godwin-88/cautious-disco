@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { domainLabel, subdomainLabel } from "@/lib/terminology";
 
 export default function InputForm({ onSubmit }: { onSubmit: (payload: any) => void }) {
   const [allDomains, setAllDomains] = useState<any[]>([]);
@@ -24,8 +23,6 @@ export default function InputForm({ onSubmit }: { onSubmit: (payload: any) => vo
       .catch(() => setAllDomains([]));
   }, []);
 
-  const domainOptions = allDomains.map((d) => domainLabel(d.name));
-
   useEffect(() => {
     if (selectedDomainNames.length === 0) {
       setSubdomains([]);
@@ -35,7 +32,7 @@ export default function InputForm({ onSubmit }: { onSubmit: (payload: any) => vo
       return;
     }
     const params = new URLSearchParams();
-    selectedDomainNames.forEach((n) => params.append("domain_names", n));
+    selectedDomainNames.forEach((name) => params.append("domain_names", name));
     fetch(`/api/backend/subdomains?${params}`)
       .then((r) => r.json())
       .then((data) => {
@@ -101,55 +98,104 @@ export default function InputForm({ onSubmit }: { onSubmit: (payload: any) => vo
 
   return (
     <div className="bg-[#161920] border border-gray-800 rounded-lg p-6">
-      <h2 className="text-xl font-bold text-white mb-1">Build Your Strategic Context</h2>
-      <p className="text-gray-400 text-sm mb-6">Select your organisation&apos;s focus areas step by step — the AI will generate a governance-grounded roadmap tailored to your selection.</p>
+      <h2 className="text-xl font-bold text-white mb-1">Assessment Intake</h2>
+      <p className="text-gray-400 text-sm mb-6">Configure your organisation profile and let the AI generate a digital capability roadmap.</p>
 
       {error && <div className="bg-red-900/30 border border-red-800 text-red-300 text-sm p-3 rounded mb-4">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">Step 1 — Select Strategic Domains</label>
-          <select
-            multiple
-            value={selectedDomainNames}
-            onChange={(e) => setSelectedDomainNames(Array.from(e.target.selectedOptions, (o) => o.value))}
-            className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 h-32"
-          >
-            {domainOptions.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-          <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
+          <div className="max-h-[200px] overflow-y-auto border border-gray-700 rounded bg-gray-900 p-2">
+            <div className="grid grid-cols-2 gap-2">
+              {allDomains.map((d) => {
+                const dn = d.name || d.id;
+                return (
+                  <label key={d.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 p-2 rounded">
+                    <input
+                      type="checkbox"
+                      checked={selectedDomainNames.includes(dn)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedDomainNames([...selectedDomainNames, dn]);
+                        } else {
+                          setSelectedDomainNames(selectedDomainNames.filter(x => x !== dn));
+                        }
+                      }}
+                      className="w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-white">{dn.replace("Manage ", "")}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+          {allDomains.length > 0 && (
+            <p className="text-xs text-gray-500 mt-1">Click to select multiple domains</p>
+          )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Step 2 — Select Capability Areas</label>
-          <select
-            multiple
-            value={selectedSubdomainIds}
-            onChange={(e) => setSelectedSubdomainIds(Array.from(e.target.selectedOptions, (o) => o.value))}
-            className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 h-32"
-          >
-            {subdomains.map((sd: any) => (
-              <option key={sd.id} value={sd.id}>{subdomainLabel(sd.name)}</option>
-            ))}
-          </select>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Step 2 — Capability Areas (from selected domains)</label>
+          <div className="max-h-[150px] overflow-y-auto border border-gray-700 rounded bg-gray-900 p-2">
+            {subdomains.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2">
+                {subdomains.map((sd: any) => (
+                  <label key={sd.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 p-2 rounded">
+                    <input
+                      type="checkbox"
+                      checked={selectedSubdomainIds.includes(sd.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedSubdomainIds([...selectedSubdomainIds, sd.id]);
+                        } else {
+                          setSelectedSubdomainIds(selectedSubdomainIds.filter(x => x !== sd.id));
+                        }
+                      }}
+                      className="w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-white truncate">{sd.name?.replace(/Manage |Digital /g, "") || sd.id}</span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-500 p-2">Select domains above to see capability areas</p>
+            )}
+          </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">Step 3 — Select Strategic Capabilities</label>
-          <select
-            multiple
-            value={selectedCapIds}
-            onChange={(e) => setSelectedCapIds(Array.from(e.target.selectedOptions, (o) => o.value))}
-            className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 h-32"
-          >
-            {capabilities.map((c: any) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
+          <div className="max-h-[150px] overflow-y-auto border border-gray-700 rounded bg-gray-900 p-2">
+            {capabilities.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2">
+                {capabilities.map((c: any) => (
+                  <label key={c.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 p-2 rounded">
+                    <input
+                      type="checkbox"
+                      checked={selectedCapIds.includes(c.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedCapIds([...selectedCapIds, c.id]);
+                        } else {
+                          setSelectedCapIds(selectedCapIds.filter(x => x !== c.id));
+                        }
+                      }}
+                      className="w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-white truncate">{c.name}</span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-500 p-2">Select capability areas to see specific capabilities</p>
+            )}
+          </div>
           {capabilities.length > 0 && (
-            <p className="text-xs text-gray-500 mt-1">Selected: {capabilities.length} capabilities · 🔴 {complexityCounts.high} high · 🟡 {complexityCounts.med} medium · 🟢 {complexityCounts.low} low complexity</p>
+            <p className="text-xs text-gray-500 mt-1">
+              Selected: {capabilities.length} capabilities &middot; 
+              🔴 {complexityCounts.high} high &middot; 🟡 {complexityCounts.med} medium &middot; 🟢 {complexityCounts.low} low
+            </p>
           )}
         </div>
 
@@ -197,7 +243,7 @@ export default function InputForm({ onSubmit }: { onSubmit: (payload: any) => vo
         </div>
 
         <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded text-sm">
-          Generate Strategic Roadmap
+          Run Assessment
         </button>
       </form>
     </div>
